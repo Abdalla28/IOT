@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { Text, View, TextInput, TouchableOpacity } from "react-native";
 import styles from './styles';
-import { caesarCipher } from './encryption';
+import { caesarCipher, vigenereEncode, vigenereDecode } from './encryption';
 
 export default function App() {
   const [text, setText] = useState('');
   const [key, setKey] = useState('');
   const [selectedType, setSelectedType] = useState(0);
+  const [isEncoding, setIsEncoding] = useState(true);
   const [result, setResult] = useState('');
 
   const isAlphabetic = (str) => /^[A-Za-z]+$/.test(str);
 
-  const encrypt = () => {
-    let encryptedText = "This algorithm is not implemented yet.";
+  const processText = () => {
+    let processedText = "This algorithm is not implemented yet.";
 
     if (selectedType === 0) { 
       // Caesar Cipher
       const shift = parseInt(key, 10) || 0; // Convert key to number, default to 0 if invalid
-      encryptedText = caesarCipher(text, shift);
+      processedText = caesarCipher(text, isEncoding ? shift : -shift);
     } 
     else if (selectedType === 1) { 
       // Vigenere Cipher (Only alphabetic keys allowed)
@@ -25,10 +26,12 @@ export default function App() {
         setResult("Error: Key must be alphabetic for Vigenere Cipher.");
         return;
       }
-      encryptedText = "Vigenere encryption will be here"; // Placeholder for actual function
+      processedText = isEncoding 
+        ? vigenereEncode(text, key)
+        : vigenereDecode(text, key);
     }
 
-    setResult(`Original: ${text}\nEncrypted: ${encryptedText}\nKey: ${key}\nAlgorithm: ${selectedType === 0 ? 'Caesar' : selectedType === 1 ? 'Vigenere' : 'Rail Fence'}`);
+    setResult(`Original: ${text}\n${isEncoding ? 'Encrypted' : 'Decrypted'}: ${processedText}\nKey: ${key}\nAlgorithm: ${selectedType === 0 ? 'Caesar' : selectedType === 1 ? 'Vigenere' : 'Rail Fence'}`);
   };
 
   return (
@@ -73,8 +76,23 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={encrypt}>
-        <Text style={styles.buttonText}>Encrypt</Text>
+      <View style={styles.tabContainer}>
+        <TouchableOpacity 
+          style={[styles.tab, isEncoding && styles.activeTab]} 
+          onPress={() => setIsEncoding(true)}
+        >
+          <Text style={styles.tabText}>Encode</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, !isEncoding && styles.activeTab]} 
+          onPress={() => setIsEncoding(false)}
+        >
+          <Text style={styles.tabText}>Decode</Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity style={styles.button} onPress={processText}>
+        <Text style={styles.buttonText}>{isEncoding ? 'Encrypt' : 'Decrypt'}</Text>
       </TouchableOpacity>
 
       {result ? (

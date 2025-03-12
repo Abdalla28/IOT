@@ -26,3 +26,69 @@ export const caesarCipher = (text, shift) => {
       .join("");
   };
   
+// Vigenère cipher encoding function
+export const vigenereEncode = (text, key) => {
+  if (!text || !key) return "";
+  
+  // Convert key to uppercase and repeat it to match text length
+  const upperKey = key.toUpperCase();
+  const repeatedKey = Array(text.length)
+    .fill(upperKey)
+    .join("")
+    .slice(0, text.length);
+
+  return text
+    .split("")
+    .map((char, i) => {
+      if (char.match(/[a-z]/i)) {
+        const isUpperCase = char === char.toUpperCase();
+        const charCode = char.toUpperCase().charCodeAt(0);
+        const keyCode = repeatedKey[i].charCodeAt(0);
+        
+        // Calculate shift and apply encoding
+        const shift = keyCode - 65; // A = 0, B = 1, etc.
+        let encodedCode = ((charCode - 65 + shift) % 26) + 65;
+        
+        // Preserve original case
+        return isUpperCase
+          ? String.fromCharCode(encodedCode)
+          : String.fromCharCode(encodedCode).toLowerCase();
+      }
+      return char; // Keep non-alphabetic characters unchanged
+    })
+    .join("");
+};
+
+// Vigenère cipher decoding function
+export const vigenereDecode = (text, key) => {
+  if (!text || !key) return "";
+  
+  // Convert key to uppercase and repeat it to match text length
+  const upperKey = key.toUpperCase();
+  const repeatedKey = Array(text.length)
+    .fill(upperKey)
+    .join("")
+    .slice(0, text.length);
+
+  return text
+    .split("")
+    .map((char, i) => {
+      if (char.match(/[a-z]/i)) {
+        const isUpperCase = char === char.toUpperCase();
+        const charCode = char.toUpperCase().charCodeAt(0);
+        const keyCode = repeatedKey[i].charCodeAt(0);
+        
+        // Calculate shift and apply decoding
+        const shift = keyCode - 65; // A = 0, B = 1, etc.
+        let decodedCode = ((charCode - 65 - shift + 26) % 26) + 65;
+        
+        // Preserve original case
+        return isUpperCase
+          ? String.fromCharCode(decodedCode)
+          : String.fromCharCode(decodedCode).toLowerCase();
+      }
+      return char; // Keep non-alphabetic characters unchanged
+    })
+    .join("");
+};
+  
