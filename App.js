@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Text, View, TextInput, TouchableOpacity } from "react-native";
-import styles from './styles';
-import { caesarCipher, vigenereEncode, vigenereDecode, railFenceEncode, railFenceDecode } from './encryption';
+import styles from "./styles";
+import {
+  caesarCipher,
+  vigenereEncode,
+  vigenereDecode,
+  railFenceEncode,
+  railFenceDecode,
+} from "./encryption";
 
 export default function App() {
-  const [text, setText] = useState('');
-  const [key, setKey] = useState('');
+  const [text, setText] = useState("");
+  const [key, setKey] = useState("");
   const [selectedType, setSelectedType] = useState(0);
   const [isEncoding, setIsEncoding] = useState(true);
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
 
   const isAlphabetic = (str) => /^[A-Za-z\s]*$/.test(str);
   const isNumeric = (str) => /^[0-9]*$/.test(str);
 
   const handleKeyChange = (value) => {
     // Validate input based on selected cipher type
-    if (selectedType === 1) { // Vigenere
+    if (selectedType === 1) {
+      // Vigenere
       if (isAlphabetic(value)) {
         setKey(value);
       }
-    } else { // Caesar or Rail Fence
+    } else {
+      // Caesar or Rail Fence
       if (isNumeric(value)) {
         setKey(value);
       }
@@ -36,40 +44,51 @@ export default function App() {
   const processText = () => {
     let processedText = "This algorithm is not implemented yet.";
 
-    if (selectedType === 0) { // Caesar Cipher
+    if (selectedType === 0) {
+      // Caesar Cipher
       if (!isNumeric(key)) {
         setResult("Error: Key must be numeric for Caesar Cipher.");
         return;
       }
       const shift = parseInt(key, 10) || 0;
       processedText = caesarCipher(text, isEncoding ? shift : -shift);
-    } 
-    else if (selectedType === 1) { // Vigenere Cipher
+    } else if (selectedType === 1) {
+      // Vigenere Cipher
       if (!isAlphabetic(key)) {
         setResult("Error: Key must be alphabetic for Vigenere Cipher.");
         return;
       }
-      processedText = isEncoding 
+      processedText = isEncoding
         ? vigenereEncode(text, key)
         : vigenereDecode(text, key);
-    }
-    else if (selectedType === 2) { // Rail Fence
+    } else if (selectedType === 2) {
+      // Rail Fence
       if (!isNumeric(key)) {
         setResult("Error: Key must be numeric for Rail Fence Cipher.");
         return;
       }
-      processedText = isEncoding 
-        ? railFenceEncode(text, parseInt(key, 10)) 
+      processedText = isEncoding
+        ? railFenceEncode(text, parseInt(key, 10))
         : railFenceDecode(text, parseInt(key, 10));
     }
 
-    setResult(`Original: ${text}\n${isEncoding ? 'Encrypted' : 'Decrypted'}: ${processedText}\nKey: ${key}\nAlgorithm: ${selectedType === 0 ? 'Caesar' : selectedType === 1 ? 'Vigenere' : 'Rail Fence'}`);
+    setResult(
+      `Original: ${text}\n${
+        isEncoding ? "Encrypted" : "Decrypted"
+      }: ${processedText}\nKey: ${key}\nAlgorithm: ${
+        selectedType === 0
+          ? "Caesar"
+          : selectedType === 1
+          ? "Vigenere"
+          : "Rail Fence"
+      }`
+    );
   };
 
   // When cipher type changes, clear the key
   const handleTypeChange = (type) => {
     setSelectedType(type);
-    setKey(''); // Clear key when changing cipher type
+    setKey(""); // Clear key when changing cipher type
   };
 
   return (
@@ -86,7 +105,9 @@ export default function App() {
       <Text style={styles.label}>Enter The Key</Text>
       <TextInput
         style={styles.input}
-        placeholder={selectedType === 1 ? "Key (letters only)" : "Key (numbers only)"}
+        placeholder={
+          selectedType === 1 ? "Key (letters only)" : "Key (numbers only)"
+        }
         placeholderTextColor="#888"
         value={key}
         onChangeText={handleKeyChange}
@@ -95,20 +116,20 @@ export default function App() {
 
       <Text style={styles.label}>Choose The Algorithm</Text>
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, selectedType === 0 && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, selectedType === 0 && styles.activeTab]}
           onPress={() => handleTypeChange(0)}
         >
           <Text style={styles.tabText}>Caesar</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, selectedType === 1 && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, selectedType === 1 && styles.activeTab]}
           onPress={() => handleTypeChange(1)}
         >
           <Text style={styles.tabText}>Vigenere</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, selectedType === 2 && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, selectedType === 2 && styles.activeTab]}
           onPress={() => handleTypeChange(2)}
         >
           <Text style={styles.tabText}>Rail Fence</Text>
@@ -116,14 +137,14 @@ export default function App() {
       </View>
 
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, isEncoding && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, isEncoding && styles.activeTab]}
           onPress={() => setIsEncoding(true)}
         >
           <Text style={styles.tabText}>Encode</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, !isEncoding && styles.activeTab]} 
+        <TouchableOpacity
+          style={[styles.tab, !isEncoding && styles.activeTab]}
           onPress={() => setIsEncoding(false)}
         >
           <Text style={styles.tabText}>Decode</Text>
@@ -131,13 +152,17 @@ export default function App() {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={processText}>
-        <Text style={styles.buttonText}>{isEncoding ? 'Encrypt' : 'Decrypt'}</Text>
+        <Text style={styles.buttonText}>
+          {isEncoding ? "Encrypt" : "Decrypt"}
+        </Text>
       </TouchableOpacity>
 
       {result ? (
         <View style={styles.resultContainer}>
-          {result.split('\n').map((line, index) => (
-            <Text key={index} style={styles.resultText}>{line}</Text>
+          {result.split("\n").map((line, index) => (
+            <Text key={index} style={styles.resultText}>
+              {line}
+            </Text>
           ))}
         </View>
       ) : null}
