@@ -10,7 +10,7 @@ export default function App() {
   const [isEncoding, setIsEncoding] = useState(true);
   const [result, setResult] = useState('');
 
-  const isAlphabetic = (str) => /^[A-Za-z]*$/.test(str);
+  const isAlphabetic = (str) => /^[A-Za-z\s]*$/.test(str);
   const isNumeric = (str) => /^[0-9]*$/.test(str);
 
   const handleKeyChange = (value) => {
@@ -23,6 +23,13 @@ export default function App() {
       if (isNumeric(value)) {
         setKey(value);
       }
+    }
+  };
+
+  const handleTextChange = (value) => {
+    // Only allow alphabetic characters and spaces
+    if (isAlphabetic(value)) {
+      setText(value);
     }
   };
 
@@ -67,13 +74,13 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Enter The Text</Text>
+      <Text style={styles.label}>Enter The Text (letters only)</Text>
       <TextInput
         style={styles.input}
         placeholder="Ex: hello world"
         placeholderTextColor="#888"
         value={text}
-        onChangeText={setText}
+        onChangeText={handleTextChange}
       />
 
       <Text style={styles.label}>Enter The Key</Text>
