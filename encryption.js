@@ -26,6 +26,96 @@ export const caesarCipher = (text, shift) => {
       .join("");
   };
   
+export const railFenceEncode = (text, key) => {
+  if (!text) return "";
+  let noSpaceText = text.split(' ').join('');
+
+  if (key <= 1) return text;
+
+  // Create the rail fence matrix
+  const fence = Array(key).fill().map(() => Array(noSpaceText.length).fill(''));
+  
+  let rail = 0;
+  let direction = 1; // 1 for moving down, -1 for moving up
+
+  // Fill the fence pattern
+  for (let i = 0; i < noSpaceText.length; i++) {
+    fence[rail][i] = noSpaceText[i];
+    
+    rail += direction;
+    
+    // Change direction when we hit the top or bottom rail
+    if (rail === key - 1) {
+      direction = -1;
+    } else if (rail === 0) {
+      direction = 1;
+    }
+  }
+
+  // Read off the encrypted text
+  let result = '';
+  for (let i = 0; i < key; i++) {
+    for (let j = 0; j < noSpaceText.length; j++) {
+      if (fence[i][j] !== '') {
+        result += fence[i][j];
+      }
+    }
+  }
+
+  return result;
+};
+
+export const railFenceDecode = (text, key) => {
+  if (!text) return "";
+  if (key <= 1) return text;
+
+  const fence = Array(key).fill().map(() => Array(text.length).fill(''));
+  
+  // First, mark the positions where characters should be
+  let rail = 0;
+  let direction = 1;
+  
+  // Mark positions with '*'
+  for (let i = 0; i < text.length; i++) {
+    fence[rail][i] = '*';
+    rail += direction;
+    
+    if (rail === key - 1) {
+      direction = -1;
+    } else if (rail === 0) {
+      direction = 1;
+    }
+  }
+  
+  // Fill the fence with the encrypted text
+  let index = 0;
+  for (let i = 0; i < key; i++) {
+    for (let j = 0; j < text.length; j++) {
+      if (fence[i][j] === '*' && index < text.length) {
+        fence[i][j] = text[index++];
+      }
+    }
+  }
+  
+  // Read off in zigzag pattern
+  let result = '';
+  rail = 0;
+  direction = 1;
+  
+  for (let i = 0; i < text.length; i++) {
+    result += fence[rail][i];
+    rail += direction;
+    
+    if (rail === key - 1) {
+      direction = -1;
+    } else if (rail === 0) {
+      direction = 1;
+    }
+  }
+  
+  return result;
+};
+
 // Vigenère cipher encoding function
 export const vigenereEncode = (text, key) => {
   if (!text || !key) return "";

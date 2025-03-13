@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View, TextInput, TouchableOpacity } from "react-native";
 import styles from './styles';
-import { caesarCipher, vigenereEncode, vigenereDecode } from './encryption';
+import { caesarCipher, vigenereEncode, vigenereDecode, railFenceEncode, railFenceDecode } from './encryption';
 
 export default function App() {
   const [text, setText] = useState('');
@@ -10,18 +10,34 @@ export default function App() {
   const [isEncoding, setIsEncoding] = useState(true);
   const [result, setResult] = useState('');
 
-  const isAlphabetic = (str) => /^[A-Za-z]+$/.test(str);
+  const isAlphabetic = (str) => /^[A-Za-z]*$/.test(str);
+  const isNumeric = (str) => /^[0-9]*$/.test(str);
+
+  const handleKeyChange = (value) => {
+    // Validate input based on selected cipher type
+    if (selectedType === 1) { // Vigenere
+      if (isAlphabetic(value)) {
+        setKey(value);
+      }
+    } else { // Caesar or Rail Fence
+      if (isNumeric(value)) {
+        setKey(value);
+      }
+    }
+  };
 
   const processText = () => {
     let processedText = "This algorithm is not implemented yet.";
 
-    if (selectedType === 0) { 
-      // Caesar Cipher
-      const shift = parseInt(key, 10) || 0; // Convert key to number, default to 0 if invalid
+    if (selectedType === 0) { // Caesar Cipher
+      if (!isNumeric(key)) {
+        setResult("Error: Key must be numeric for Caesar Cipher.");
+        return;
+      }
+      const shift = parseInt(key, 10) || 0;
       processedText = caesarCipher(text, isEncoding ? shift : -shift);
     } 
-    else if (selectedType === 1) { 
-      // Vigenere Cipher (Only alphabetic keys allowed)
+    else if (selectedType === 1) { // Vigenere Cipher
       if (!isAlphabetic(key)) {
         setResult("Error: Key must be alphabetic for Vigenere Cipher.");
         return;
@@ -30,8 +46,23 @@ export default function App() {
         ? vigenereEncode(text, key)
         : vigenereDecode(text, key);
     }
+    else if (selectedType === 2) { // Rail Fence
+      if (!isNumeric(key)) {
+        setResult("Error: Key must be numeric for Rail Fence Cipher.");
+        return;
+      }
+      processedText = isEncoding 
+        ? railFenceEncode(text, parseInt(key, 10)) 
+        : railFenceDecode(text, parseInt(key, 10));
+    }
 
     setResult(`Original: ${text}\n${isEncoding ? 'Encrypted' : 'Decrypted'}: ${processedText}\nKey: ${key}\nAlgorithm: ${selectedType === 0 ? 'Caesar' : selectedType === 1 ? 'Vigenere' : 'Rail Fence'}`);
+  };
+
+  // When cipher type changes, clear the key
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+    setKey(''); // Clear key when changing cipher type
   };
 
   return (
@@ -48,29 +79,30 @@ export default function App() {
       <Text style={styles.label}>Enter The Key</Text>
       <TextInput
         style={styles.input}
-        placeholder="Key"
+        placeholder={selectedType === 1 ? "Key (letters only)" : "Key (numbers only)"}
         placeholderTextColor="#888"
         value={key}
-        onChangeText={setKey}
+        onChangeText={handleKeyChange}
+        keyboardType={selectedType === 1 ? "default" : "numeric"}
       />
 
       <Text style={styles.label}>Choose The Algorithm</Text>
       <View style={styles.tabContainer}>
         <TouchableOpacity 
           style={[styles.tab, selectedType === 0 && styles.activeTab]} 
-          onPress={() => setSelectedType(0)}
+          onPress={() => handleTypeChange(0)}
         >
           <Text style={styles.tabText}>Caesar</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, selectedType === 1 && styles.activeTab]} 
-          onPress={() => setSelectedType(1)}
+          onPress={() => handleTypeChange(1)}
         >
           <Text style={styles.tabText}>Vigenere</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, selectedType === 2 && styles.activeTab]} 
-          onPress={() => setSelectedType(2)}
+          onPress={() => handleTypeChange(2)}
         >
           <Text style={styles.tabText}>Rail Fence</Text>
         </TouchableOpacity>
