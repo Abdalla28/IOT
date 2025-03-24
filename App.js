@@ -15,6 +15,7 @@ export default function App() {
   const [selectedType, setSelectedType] = useState(0);
   const [isEncoding, setIsEncoding] = useState(true);
   const [result, setResult] = useState("");
+  const [mode, setMode] = useState("normal");
 
   const isAlphabetic = (str) => /^[A-Za-z\s]*$/.test(str);
   const isNumeric = (str) => /^[0-9]*$/.test(str);
@@ -91,71 +92,108 @@ export default function App() {
     setKey(""); // Clear key when changing cipher type
   };
 
+  const handleBreak = () => {
+    setResult("Break functionality will be implemented here");
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Enter The Text (letters only)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: hello world"
-        placeholderTextColor="#888"
-        value={text}
-        onChangeText={handleTextChange}
-      />
-
-      <Text style={styles.label}>Enter The Key</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={
-          selectedType === 1 ? "Key (letters only)" : "Key (numbers only)"
-        }
-        placeholderTextColor="#888"
-        value={key}
-        onChangeText={handleKeyChange}
-        keyboardType={selectedType === 1 ? "default" : "numeric"}
-      />
-
-      <Text style={styles.label}>Choose The Algorithm</Text>
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, selectedType === 0 && styles.activeTab]}
-          onPress={() => handleTypeChange(0)}
+          style={[styles.tab, mode === "normal" && styles.activeTab]}
+          onPress={() => setMode("normal")}
         >
-          <Text style={styles.tabText}>Caesar</Text>
+          <Text style={styles.tabText}>Normal</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, selectedType === 1 && styles.activeTab]}
-          onPress={() => handleTypeChange(1)}
+          style={[styles.tab, mode === "break" && styles.activeTab]}
+          onPress={() => setMode("break")}
         >
-          <Text style={styles.tabText}>Vigenere</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, selectedType === 2 && styles.activeTab]}
-          onPress={() => handleTypeChange(2)}
-        >
-          <Text style={styles.tabText}>Rail Fence</Text>
+          <Text style={styles.tabText}>Break</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, isEncoding && styles.activeTab]}
-          onPress={() => setIsEncoding(true)}
-        >
-          <Text style={styles.tabText}>Encode</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, !isEncoding && styles.activeTab]}
-          onPress={() => setIsEncoding(false)}
-        >
-          <Text style={styles.tabText}>Decode</Text>
-        </TouchableOpacity>
-      </View>
+      {mode === "normal" ? (
+        <>
+          <Text style={styles.label}>Enter The Text (letters only)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ex: hello world"
+            placeholderTextColor="#888"
+            value={text}
+            onChangeText={handleTextChange}
+          />
 
-      <TouchableOpacity style={styles.button} onPress={processText}>
-        <Text style={styles.buttonText}>
-          {isEncoding ? "Encrypt" : "Decrypt"}
-        </Text>
-      </TouchableOpacity>
+          <Text style={styles.label}>Enter The Key</Text>
+          <TextInput
+            style={styles.input}
+            placeholder={
+              selectedType === 1 ? "Key (letters only)" : "Key (numbers only)"
+            }
+            placeholderTextColor="#888"
+            value={key}
+            onChangeText={handleKeyChange}
+            keyboardType={selectedType === 1 ? "default" : "numeric"}
+          />
+
+          <Text style={styles.label}>Choose The Algorithm</Text>
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, selectedType === 0 && styles.activeTab]}
+              onPress={() => handleTypeChange(0)}
+            >
+              <Text style={styles.tabText}>Caesar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, selectedType === 1 && styles.activeTab]}
+              onPress={() => handleTypeChange(1)}
+            >
+              <Text style={styles.tabText}>Vigenere</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, selectedType === 2 && styles.activeTab]}
+              onPress={() => handleTypeChange(2)}
+            >
+              <Text style={styles.tabText}>Rail Fence</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, isEncoding && styles.activeTab]}
+              onPress={() => setIsEncoding(true)}
+            >
+              <Text style={styles.tabText}>Encode</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, !isEncoding && styles.activeTab]}
+              onPress={() => setIsEncoding(false)}
+            >
+              <Text style={styles.tabText}>Decode</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.button} onPress={processText}>
+            <Text style={styles.buttonText}>
+              {isEncoding ? "Encrypt" : "Decrypt"}
+            </Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <Text style={styles.label}>Enter The Text to Break</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter encrypted text"
+            placeholderTextColor="#888"
+            value={text}
+            onChangeText={handleTextChange}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleBreak}>
+            <Text style={styles.buttonText}>Break</Text>
+          </TouchableOpacity>
+        </>
+      )}
 
       {result ? (
         <View style={styles.resultContainer}>
