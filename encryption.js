@@ -125,14 +125,17 @@ export const railFenceDecode = (text, key) => {
 export const vigenereEncode = (text, key) => {
   if (!text || !key) return "";
 
+  // Remove spaces from input text
+  const textWithoutSpaces = text.replace(/\s/g, "");
+  
   // Convert key to uppercase and repeat it to match text length
   const upperKey = key.toUpperCase();
-  const repeatedKey = Array(text.length)
+  const repeatedKey = Array(textWithoutSpaces.length)
     .fill(upperKey)
     .join("")
-    .slice(0, text.length);
+    .slice(0, textWithoutSpaces.length);
 
-  return text
+  return textWithoutSpaces
     .split("")
     .map((char, i) => {
       if (char.match(/[a-z]/i)) {
@@ -151,22 +154,24 @@ export const vigenereEncode = (text, key) => {
       }
       return char; // Keep non-alphabetic characters unchanged
     })
-    .join("")
-    .replace(/\s/g, ""); // Remove spaces from final output
+    .join("");
 };
 
 // Vigenère cipher decoding function
 export const vigenereDecode = (text, key) => {
   if (!text || !key) return "";
 
+  // Remove spaces from input text
+  const textWithoutSpaces = text.replace(/\s/g, "");
+  
   // Convert key to uppercase and repeat it to match text length
   const upperKey = key.toUpperCase();
-  const repeatedKey = Array(text.length)
+  const repeatedKey = Array(textWithoutSpaces.length)
     .fill(upperKey)
     .join("")
-    .slice(0, text.length);
+    .slice(0, textWithoutSpaces.length);
 
-  return text
+  return textWithoutSpaces
     .split("")
     .map((char, i) => {
       if (char.match(/[a-z]/i)) {
@@ -185,6 +190,5 @@ export const vigenereDecode = (text, key) => {
       }
       return char; // Keep non-alphabetic characters unchanged
     })
-    .join("")
-    .replace(/\s/g, ""); // Remove spaces from final output
+    .join("");
 };
