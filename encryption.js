@@ -121,14 +121,41 @@ export const railFenceDecode = (text, key) => {
   return result.replace(/\s/g, ""); // Remove spaces from final output
 };
 
-// Vigenère cipher encoding function
+// Create static Vigenère table
+const VIGENERE_TABLE = [
+  ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+  ['B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A'],
+  ['C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B'],
+  ['D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C'],
+  ['E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D'],
+  ['F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E'],
+  ['G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F'],
+  ['H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G'],
+  ['I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H'],
+  ['J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I'],
+  ['K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J'],
+  ['L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K'],
+  ['M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L'],
+  ['N','O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M'],
+  ['O','P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N'],
+  ['P','Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'],
+  ['Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'],
+  ['R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q'],
+  ['S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R'],
+  ['T','U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S'],
+  ['U','V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T'],
+  ['V','W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U'],
+  ['W','X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V'],
+  ['X','Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W'],
+  ['Y','Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X'],
+  ['Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y']
+];
+
+// Modified Vigenère encode function using the table
 export const vigenereEncode = (text, key) => {
   if (!text || !key) return "";
 
-  // Remove spaces from input text
   const textWithoutSpaces = text.replace(/\s/g, "");
-  
-  // Convert key to uppercase and repeat it to match text length
   const upperKey = key.toUpperCase();
   const repeatedKey = Array(textWithoutSpaces.length)
     .fill(upperKey)
@@ -140,31 +167,28 @@ export const vigenereEncode = (text, key) => {
     .map((char, i) => {
       if (char.match(/[a-z]/i)) {
         const isUpperCase = char === char.toUpperCase();
-        const charCode = char.toUpperCase().charCodeAt(0);
-        const keyCode = repeatedKey[i].charCodeAt(0);
-
-        // Calculate shift and apply encoding
-        const shift = keyCode - 65; // A = 0, B = 1, etc.
-        let encodedCode = ((charCode - 65 + shift) % 26) + 65;
-
-        // Preserve original case
-        return isUpperCase
-          ? String.fromCharCode(encodedCode)
-          : String.fromCharCode(encodedCode).toLowerCase();
+        const plainChar = char.toUpperCase();
+        const keyChar = repeatedKey[i];
+        
+        // Get row and column indices for table lookup
+        const row = keyChar.charCodeAt(0) - 65;
+        const col = plainChar.charCodeAt(0) - 65;
+        
+        // Look up the encoded character in the table
+        const encodedChar = VIGENERE_TABLE[row][col];
+        
+        return isUpperCase ? encodedChar : encodedChar.toLowerCase();
       }
-      return char; // Keep non-alphabetic characters unchanged
+      return char;
     })
     .join("");
 };
 
-// Vigenère cipher decoding function
+// Modified Vigenère decode function using the table
 export const vigenereDecode = (text, key) => {
   if (!text || !key) return "";
 
-  // Remove spaces from input text
   const textWithoutSpaces = text.replace(/\s/g, "");
-  
-  // Convert key to uppercase and repeat it to match text length
   const upperKey = key.toUpperCase();
   const repeatedKey = Array(textWithoutSpaces.length)
     .fill(upperKey)
@@ -176,19 +200,21 @@ export const vigenereDecode = (text, key) => {
     .map((char, i) => {
       if (char.match(/[a-z]/i)) {
         const isUpperCase = char === char.toUpperCase();
-        const charCode = char.toUpperCase().charCodeAt(0);
-        const keyCode = repeatedKey[i].charCodeAt(0);
-
-        // Calculate shift and apply decoding
-        const shift = keyCode - 65; // A = 0, B = 1, etc.
-        let decodedCode = ((charCode - 65 - shift + 26) % 26) + 65;
-
-        // Preserve original case
-        return isUpperCase
-          ? String.fromCharCode(decodedCode)
-          : String.fromCharCode(decodedCode).toLowerCase();
+        const cipherChar = char.toUpperCase();
+        const keyChar = repeatedKey[i];
+        
+        // Get the row for the key character
+        const row = keyChar.charCodeAt(0) - 65;
+        
+        // Find the column where cipherChar appears in this row
+        const col = VIGENERE_TABLE[row].indexOf(cipherChar);
+        
+        // The original character is at index col in the first row
+        const decodedChar = String.fromCharCode(col + 65);
+        
+        return isUpperCase ? decodedChar : decodedChar.toLowerCase();
       }
-      return char; // Keep non-alphabetic characters unchanged
+      return char;
     })
     .join("");
 };

@@ -43,9 +43,14 @@ export default function App() {
   };
 
   const handleTextChange = (value) => {
-    // Only allow alphabetic characters and spaces
-    if (isAlphabetic(value)) {
+    if (mode === "break") {
+      // Accept all characters in break mode
       setText(value);
+    } else {
+      // Only allow alphabetic characters and spaces in normal mode
+      if (isAlphabetic(value)) {
+        setText(value);
+      }
     }
   };
 
