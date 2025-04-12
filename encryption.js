@@ -21,29 +21,26 @@ export const caesarCipher = (text, shift) => {
 
         return String.fromCharCode(newCode);
       }
-      return char;
+      return char; // Preserve spaces and other characters
     })
-    .join("")
-    .replace(/\s/g, ""); // Remove all spaces
+    .join("");
 };
 
 export const railFenceEncode = (text, key) => {
   if (!text) return "";
-  let noSpaceText = text.split(" ").join("");
-
   if (key <= 1) return text;
 
   // Create the rail fence matrix
   const fence = Array(key)
     .fill()
-    .map(() => Array(noSpaceText.length).fill(""));
+    .map(() => Array(text.length).fill(""));
 
   let rail = 0;
   let direction = 1; // 1 for moving down, -1 for moving up
 
   // Fill the fence pattern
-  for (let i = 0; i < noSpaceText.length; i++) {
-    fence[rail][i] = noSpaceText[i];
+  for (let i = 0; i < text.length; i++) {
+    fence[rail][i] = text[i];
 
     rail += direction;
 
@@ -58,7 +55,7 @@ export const railFenceEncode = (text, key) => {
   // Read off the encrypted text
   let result = "";
   for (let i = 0; i < key; i++) {
-    for (let j = 0; j < noSpaceText.length; j++) {
+    for (let j = 0; j < text.length; j++) {
       if (fence[i][j] !== "") {
         result += fence[i][j];
       }
@@ -70,7 +67,7 @@ export const railFenceEncode = (text, key) => {
 
 export const railFenceDecode = (text, key) => {
   if (!text) return "";
-  if (key <= 1) return text.replace(/\s/g, ""); // Remove spaces if key is 1
+  if (key <= 1) return text;
 
   const fence = Array(key)
     .fill()
@@ -118,9 +115,8 @@ export const railFenceDecode = (text, key) => {
     }
   }
 
-  return result.replace(/\s/g, ""); // Remove spaces from final output
+  return result;
 };
-
 // Create static Vigenère table
 const VIGENERE_TABLE = [
   ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
@@ -151,70 +147,72 @@ const VIGENERE_TABLE = [
   ['Z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y']
 ];
 
-// Modified Vigenère encode function using the table
+// Modified Vigenère encode function
 export const vigenereEncode = (text, key) => {
   if (!text || !key) return "";
 
-  const textWithoutSpaces = text.replace(/\s/g, "");
   const upperKey = key.toUpperCase();
-  const repeatedKey = Array(textWithoutSpaces.length)
-    .fill(upperKey)
-    .join("")
-    .slice(0, textWithoutSpaces.length);
+  let result = "";
+  let keyIndex = 0;
 
-  return textWithoutSpaces
-    .split("")
-    .map((char, i) => {
-      if (char.match(/[a-z]/i)) {
-        const isUpperCase = char === char.toUpperCase();
-        const plainChar = char.toUpperCase();
-        const keyChar = repeatedKey[i];
-        
-        // Get row and column indices for table lookup
-        const row = keyChar.charCodeAt(0) - 65;
-        const col = plainChar.charCodeAt(0) - 65;
-        
-        // Look up the encoded character in the table
-        const encodedChar = VIGENERE_TABLE[row][col];
-        
-        return isUpperCase ? encodedChar : encodedChar.toLowerCase();
-      }
-      return char;
-    })
-    .join("");
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    
+    if (char.match(/[a-z]/i)) {
+      const isUpperCase = char === char.toUpperCase();
+      const plainChar = char.toUpperCase();
+      const keyChar = upperKey[keyIndex % upperKey.length];
+      
+      // Get row and column indices for table lookup
+      const row = keyChar.charCodeAt(0) - 65;
+      const col = plainChar.charCodeAt(0) - 65;
+      
+      // Look up the encoded character in the table
+      const encodedChar = VIGENERE_TABLE[row][col];
+      
+      result += isUpperCase ? encodedChar : encodedChar.toLowerCase();
+      keyIndex++;
+    } else {
+      // Preserve spaces and other characters
+      result += char;
+    }
+  }
+  
+  return result;
 };
 
-// Modified Vigenère decode function using the table
+// Modified Vigenère decode function
 export const vigenereDecode = (text, key) => {
   if (!text || !key) return "";
 
-  const textWithoutSpaces = text.replace(/\s/g, "");
   const upperKey = key.toUpperCase();
-  const repeatedKey = Array(textWithoutSpaces.length)
-    .fill(upperKey)
-    .join("")
-    .slice(0, textWithoutSpaces.length);
+  let result = "";
+  let keyIndex = 0;
 
-  return textWithoutSpaces
-    .split("")
-    .map((char, i) => {
-      if (char.match(/[a-z]/i)) {
-        const isUpperCase = char === char.toUpperCase();
-        const cipherChar = char.toUpperCase();
-        const keyChar = repeatedKey[i];
-        
-        // Get the row for the key character
-        const row = keyChar.charCodeAt(0) - 65;
-        
-        // Find the column where cipherChar appears in this row
-        const col = VIGENERE_TABLE[row].indexOf(cipherChar);
-        
-        // The original character is at index col in the first row
-        const decodedChar = String.fromCharCode(col + 65);
-        
-        return isUpperCase ? decodedChar : decodedChar.toLowerCase();
-      }
-      return char;
-    })
-    .join("");
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    
+    if (char.match(/[a-z]/i)) {
+      const isUpperCase = char === char.toUpperCase();
+      const cipherChar = char.toUpperCase();
+      const keyChar = upperKey[keyIndex % upperKey.length];
+      
+      // Get the row for the key character
+      const row = keyChar.charCodeAt(0) - 65;
+      
+      // Find the column where cipherChar appears in this row
+      const col = VIGENERE_TABLE[row].indexOf(cipherChar);
+      
+      // The original character is at index col in the first row
+      const decodedChar = String.fromCharCode(col + 65);
+      
+      result += isUpperCase ? decodedChar : decodedChar.toLowerCase();
+      keyIndex++;
+    } else {
+      // Preserve spaces and other characters
+      result += char;
+    }
+  }
+  
+  return result;
 };
